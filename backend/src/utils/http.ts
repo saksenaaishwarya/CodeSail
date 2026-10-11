@@ -1,0 +1,1 @@
+import {Response} from 'express';export function ok<T>(res:Response,data:T,message='Success'){return res.status(200).json({success:true,data,message})}export function fail(res:Response,status:number,message:string,code='REQUEST_FAILED',details:unknown={}){return res.status(status).json({success:false,message,error:{code,details}})}
