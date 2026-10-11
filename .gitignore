@@ -1,0 +1,23 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# CodeSail temporary execution workspaces (should never be committed; they are
+# created under the OS temp folder, but this guards against local copies)
+codesail-*/
+tmp/
+*.exe
+*.out
+main
+
+# Editor / OS noise
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
