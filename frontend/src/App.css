@@ -495,3 +495,13 @@ body {
     display: none;
   }
 }
+
+/* ---------- Output area ---------- */
+.terminal-hint {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.terminal-error {
+  color: var(--red);
+}

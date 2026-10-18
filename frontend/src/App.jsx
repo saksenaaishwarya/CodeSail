@@ -16,22 +16,49 @@ function App() {
     () => localStorage.getItem(STORAGE_KEY) ?? CPP_STARTER_CODE
   );
 
-  // Teammate 2 will replace these placeholders with real logic
-  const [isRunning] = useState(false);
-  const [output] = useState("");
-  const [error] = useState("");
+  // Run state
+  const [isRunning, setIsRunning] = useState(false);
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("output");
 
   // Save the code every time it changes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, code);
   }, [code]);
 
-  const handleRun = () => {
-    console.log("Run clicked. Code to execute:", code);
+  const handleRun = async () => {
+    setActiveTab("output");
+    setIsRunning(true);
+    setOutput("");
+    setError("");
+
+    try {
+      const response = await fetch("/api/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await response.json();
+
+      // Teammates' backend should reply with { output, error }
+      setOutput(data.output ?? "");
+      setError(data.error ?? "");
+    } catch {
+      setError(
+        "Could not reach the backend at /api/execute.\n" +
+          "Make sure the backend server is running."
+      );
+    } finally {
+      setIsRunning(false);
+    }
   };
+
   const handleSubmit = () => {
     console.log("Submit clicked");
   };
+
   const handleReset = () => {
     setCode(CPP_STARTER_CODE);
   };
@@ -57,7 +84,13 @@ function App() {
             </div>
           </div>
 
-          <BottomPanel output={output} error={error} />
+          <BottomPanel
+            output={output}
+            error={error}
+            isRunning={isRunning}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
         </section>
 
         <ProblemPanel />

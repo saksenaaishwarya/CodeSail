@@ -8,9 +8,7 @@ const SAMPLE_TESTS = [
   { id: 4, name: "Case 4", input: "n = 1", expected: "False", output: "True", passed: false },
 ];
 
-function BottomPanel({ output, error }) {
-  const [activeTab, setActiveTab] = useState("tests");
-
+function BottomPanel({ output, error, isRunning, activeTab, setActiveTab }) {
   const passedCount = SAMPLE_TESTS.filter((t) => t.passed).length;
   const total = SAMPLE_TESTS.length;
   const percent = (passedCount / total) * 100;
@@ -20,25 +18,52 @@ function BottomPanel({ output, error }) {
       <div className="tabs-row">
         <div className="tabs">
           <button
+            className={activeTab === "output" ? "tab active" : "tab"}
+            onClick={() => setActiveTab("output")}
+          >
+            Output
+          </button>
+          <button
             className={activeTab === "tests" ? "tab active" : "tab"}
             onClick={() => setActiveTab("tests")}
           >
             Test Results
           </button>
-          <button
-            className={activeTab === "terminal" ? "tab active" : "tab"}
-            onClick={() => setActiveTab("terminal")}
-          >
-            Terminal
-          </button>
         </div>
 
+        {activeTab === "output" && isRunning && (
+          <span className="badge badge-yellow">RUNNING...</span>
+        )}
+        {activeTab === "output" && !isRunning && error && (
+          <span className="badge badge-red">ERROR</span>
+        )}
+        {activeTab === "output" && !isRunning && !error && output && (
+          <span className="badge badge-green">SUCCESS</span>
+        )}
         {activeTab === "tests" && (
           <span className="badge badge-yellow">
             PASSED: {passedCount}/{total}
           </span>
         )}
       </div>
+
+      {activeTab === "output" && (
+        <div className="tab-content">
+          {isRunning && <pre className="terminal">Compiling and running...</pre>}
+
+          {!isRunning && !output && !error && (
+            <pre className="terminal terminal-hint">
+              Click "Run Code" to see your program's output here.
+            </pre>
+          )}
+
+          {!isRunning && output && <pre className="terminal">{output}</pre>}
+
+          {!isRunning && error && (
+            <pre className="terminal terminal-error">{error}</pre>
+          )}
+        </div>
+      )}
 
       {activeTab === "tests" && (
         <div className="tab-content">
@@ -72,14 +97,6 @@ function BottomPanel({ output, error }) {
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {activeTab === "terminal" && (
-        <div className="tab-content">
-          <pre className="terminal">
-            {error ? error : output ? output : "Output will appear here..."}
-          </pre>
         </div>
       )}
     </div>
