@@ -1,0 +1,17 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+enum Role { STUDENT FACULTY ADMIN }
+enum QuestionStatus { DRAFT PUBLISHED ARCHIVED }
+enum Difficulty { EASY MEDIUM HARD }
+enum AssessmentStatus { DRAFT SCHEDULED ACTIVE COMPLETED ARCHIVED }
+model User { id String @id @default(uuid()) email String @unique name String passwordHash String role Role department String? batchId String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt batch Batch? questions Question[] submissions Submission[] activities Activity[] }
+model Batch { id String @id @default(uuid()) name String program String department String semester Int year Int facultyAllocations BatchFaculty[] students User[] assessments Assessment[] createdAt DateTime @default(now()) }
+model BatchFaculty { id String @id @default(uuid()) batchId String facultyId String batch Batch @relation(fields:[batchId],references:[id],onDelete:Cascade) faculty User @relation(fields:[facultyId],references:[id],onDelete:Cascade) @@unique([batchId,facultyId]) }
+model Question { id String @id @default(uuid()) title String topic String type String difficulty Difficulty statement String inputFormat String? outputFormat String? constraints String? examples Json? tags String[] status QuestionStatus @default(DRAFT) createdById String creator User @relation(fields:[createdById],references:[id]) testCases TestCase[] submissions Submission[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model TestCase { id String @id @default(uuid()) questionId String input String expectedOutput String question Question @relation(fields:[questionId],references:[id],onDelete:Cascade) }
+model Assessment { id String @id @default(uuid()) title String description String? batchId String durationMinutes Int attempts Int @default(1) startAt DateTime endAt DateTime status AssessmentStatus @default(DRAFT) batch Batch @relation(fields:[batchId],references:[id]) questions AssessmentQuestion[] submissions Submission[] createdAt DateTime @default(now()) }
+model AssessmentQuestion { id String @id @default(uuid()) assessmentId String questionId String assessment Assessment @relation(fields:[assessmentId],references:[id],onDelete:Cascade) question Question @relation(fields:[questionId],references:[id],onDelete:Cascade) @@unique([assessmentId,questionId]) }
+model Submission { id String @id @default(uuid()) userId String questionId String assessmentId String? language String sourceCode String status String score Float? submittedAt DateTime @default(now()) user User @relation(fields:[userId],references:[id]) question Question @relation(fields:[questionId],references:[id]) assessment Assessment? @relation(fields:[assessmentId],references:[id]) evaluation Evaluation? executionId String? }
+model Evaluation { id String @id @default(uuid()) submissionId String @unique score Float feedback String? passedTests Int totalTests Int submission Submission @relation(fields:[submissionId],references:[id],onDelete:Cascade) }
+model Activity { id String @id @default(uuid()) timestamp DateTime @default(now()) userId String? action String resource String status String user User? @relation(fields:[userId],references:[id]) }
